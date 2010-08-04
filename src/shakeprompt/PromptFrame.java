@@ -30,7 +30,6 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package shakeprompt;
 
 import java.awt.Dimension;
@@ -158,45 +157,62 @@ public class PromptFrame extends JFrame implements ActionListener
 		add(quit, c);
 
 		pack();
+
+		nextLine();
 	}
 
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource().equals(nextLine))
 		{
-			try
-			{
-				line = Main.lines.get(new Random().nextInt(Main.lines.size()));
-				cuePane.setText(line.getCue().toHTMLString());
-				linePane.setText("");
-				showWord.setEnabled(true);
-				showLine.setEnabled(true);
-			}
-			catch (NullPointerException ex)
-			{
-				JOptionPane.showMessageDialog(null, "No lines found!", "ShakePrompt", JOptionPane.ERROR_MESSAGE);
-			}
+			nextLine();
 		}
 		else if (e.getSource().equals(showWord))
 		{
-			String words = line.getNextHTMLWord();
-			linePane.setText(words);
-
-			if (words.equals(line.toHTMLString()))
-			{
-				showWord.setEnabled(false);
-				showLine.setEnabled(false);
-			}
+			showWord();
 		}
 		else if (e.getSource().equals(showLine))
 		{
-			linePane.setText(line.toHTMLString());
-			showWord.setEnabled(false);
-			showLine.setEnabled(false);
+			showLine();
 		}
 		else if (e.getSource().equals(quit))
 		{
 			System.exit(0);
 		}
+	}
+
+	private void nextLine()
+	{
+		try
+		{
+			line = Main.lines.get(new Random().nextInt(Main.lines.size()));
+			cuePane.setText(line.getCue().toHTMLString());
+			linePane.setText("");
+			showWord.setEnabled(true);
+			showLine.setEnabled(true);
+		}
+		catch (NullPointerException ex)
+		{
+			JOptionPane.showMessageDialog(null, "No lines found!", "ShakePrompt", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	private void showWord()
+	{
+		String words = line.getNextHTMLWord();
+		linePane.setText(words);
+
+		if (words.equals(line.toHTMLString()))
+		{
+			showWord.setEnabled(false);
+			showLine.setEnabled(false);
+		}
+	}
+
+	private void showLine()
+	{
+		linePane.setText(line.toHTMLString());
+		showWord.setEnabled(false);
+		showLine.setEnabled(false);
 	}
 }

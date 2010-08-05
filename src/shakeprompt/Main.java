@@ -36,13 +36,14 @@ package shakeprompt;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 public class Main
 {
-	public static List<Line> lines;
+	public static List<Line> lines = new ArrayList<Line>();
 
 	public static void main(String[] args)
 	{

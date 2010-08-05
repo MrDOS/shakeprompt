@@ -85,18 +85,9 @@ public class Line
 		this.cue = cue;
 	}
 
-	public String getNextHTMLWord()
+	public String getNextWord()
 	{
-		String retval = "<strong>" + character.getName() + ":</strong>";
-
-		wordIndex++;
-		String words[] = line.split(" ");
-		for (int i = 0; i < wordIndex; i++)
-		{
-			retval += " " + words[i];
-		}
-
-		return retval.replace(System.getProperty("line.separator"), "<br>" + System.getProperty("line.separator"));
+		return (wordIndex < line.split(" ").length) ? line.split(" ")[wordIndex++] : "";
 	}
 
 	public void reset()

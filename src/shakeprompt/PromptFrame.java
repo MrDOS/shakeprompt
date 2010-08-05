@@ -45,19 +45,27 @@ import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 
 public class PromptFrame extends JFrame implements ActionListener
 {
 
 	JEditorPane cuePane;
 	JEditorPane linePane;
-	JButton context;
+	JPanel rangePanel;
+	JTextField rangeMinimum;
+	JTextField rangeMaximum;
 	JButton nextLine;
 	JButton showWord;
 	JButton showLine;
 	JButton quit;
 	Line line = new Line(new PlayCharacter(""), "");
+	String lineChunk;
 
 	public PromptFrame()
 	{
@@ -111,13 +119,64 @@ public class PromptFrame extends JFrame implements ActionListener
 		add(new JScrollPane(linePane), c);
 
 		c = new GridBagConstraints();
+		rangePanel = new JPanel();
+		rangePanel.setLayout(new GridBagLayout());
+		c.anchor = GridBagConstraints.WEST;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1;
+		c.insets = new Insets(0, 4, 0, 4);
+		c.gridx = 0;
+		c.gridy = 4;
+		c.gridwidth = 4;
+		add(rangePanel, c);
+
+		c = new GridBagConstraints();
+		c.insets = new Insets(4, 4, 4, 4);
+		c.gridx = 0;
+		c.gridy = 0;
+		rangePanel.add(new JLabel("Line range:"), c);
+
+		c = new GridBagConstraints();
+		rangeMinimum = new JTextField("1");
+		rangeMinimum.setColumns(2);
+		rangeMinimum.setHorizontalAlignment(JTextField.RIGHT);
+		c.insets = new Insets(4, 4, 4, 4);
+		c.gridx = 1;
+		c.gridy = 0;
+		rangePanel.add(rangeMinimum, c);
+
+		c = new GridBagConstraints();
+		JLabel rangeDivider = new JLabel("/");
+		rangeDivider.setEnabled(false);
+		c.insets = new Insets(4, 4, 4, 4);
+		c.gridx = 2;
+		c.gridy = 0;
+		rangePanel.add(rangeDivider, c);
+
+		c = new GridBagConstraints();
+		rangeMaximum = new JTextField(new NumericDocument(), Integer.valueOf(Main.lines.size()).toString(), 2);
+		rangeMaximum.setHorizontalAlignment(JTextField.RIGHT);
+		c.insets = new Insets(4, 4, 4, 4);
+		c.gridx = 3;
+		c.gridy = 0;
+		rangePanel.add(rangeMaximum, c);
+
+		c = new GridBagConstraints();
+		JLabel range = new JLabel("(Max: " + Integer.valueOf(Main.lines.size()).toString() + ")");
+		range.setEnabled(false);
+		c.insets = new Insets(4, 4, 4, 4);
+		c.gridx = 4;
+		c.gridy = 0;
+		rangePanel.add(range, c);
+
+		c = new GridBagConstraints();
 		nextLine = new JButton("Next Line");
 		nextLine.setMnemonic(KeyEvent.VK_N);
 		nextLine.setToolTipText("Show another random line.");
 		nextLine.addActionListener(this);
 		c.anchor = GridBagConstraints.EAST;
 		c.gridx = 0;
-		c.gridy = 4;
+		c.gridy = 5;
 		c.insets = new Insets(4, 4, 4, 4);
 		add(nextLine, c);
 
@@ -129,7 +188,7 @@ public class PromptFrame extends JFrame implements ActionListener
 		showWord.addActionListener(this);
 		c.anchor = GridBagConstraints.WEST;
 		c.gridx = 1;
-		c.gridy = 4;
+		c.gridy = 5;
 		c.insets = new Insets(4, 4, 4, 0);
 		add(showWord, c);
 
@@ -141,7 +200,7 @@ public class PromptFrame extends JFrame implements ActionListener
 		showLine.addActionListener(this);
 		c.anchor = GridBagConstraints.WEST;
 		c.gridx = 2;
-		c.gridy = 4;
+		c.gridy = 5;
 		c.insets = new Insets(4, 0, 4, 4);
 		add(showLine, c);
 
@@ -152,7 +211,7 @@ public class PromptFrame extends JFrame implements ActionListener
 		quit.addActionListener(this);
 		c.anchor = GridBagConstraints.EAST;
 		c.gridx = 3;
-		c.gridy = 4;
+		c.gridy = 5;
 		c.insets = new Insets(4, 4, 4, 4);
 		add(quit, c);
 
@@ -185,13 +244,28 @@ public class PromptFrame extends JFrame implements ActionListener
 	{
 		try
 		{
-			line = Main.lines.get(new Random().nextInt(Main.lines.size()));
+			int rangeMinimum = (Integer.valueOf(this.rangeMinimum.getText()) - 1);
+			int rangeMaximum = Integer.valueOf(this.rangeMaximum.getText());
+
+			if (rangeMinimum < 1)
+			{
+				this.rangeMinimum.setText("1");
+				rangeMinimum = 1;
+			}
+			if (rangeMinimum + 1 > rangeMaximum)
+			{
+				this.rangeMaximum.setText(Integer.valueOf(rangeMinimum + 1).toString());
+				rangeMaximum = rangeMinimum + 1;
+			}
+
+			line = Main.lines.get(new Random().nextInt(rangeMaximum - rangeMinimum) + rangeMinimum);
+			lineChunk = "<strong>" + line.getCharacter().getName() + ":</strong>";
 			cuePane.setText(line.getCue().toHTMLString());
 			linePane.setText("");
 			showWord.setEnabled(true);
 			showLine.setEnabled(true);
 		}
-		catch (NullPointerException ex)
+		catch (IllegalArgumentException ex)
 		{
 			JOptionPane.showMessageDialog(null, "No lines found!", "ShakePrompt", JOptionPane.ERROR_MESSAGE);
 		}
@@ -199,10 +273,10 @@ public class PromptFrame extends JFrame implements ActionListener
 
 	private void showWord()
 	{
-		String words = line.getNextHTMLWord();
-		linePane.setText(words);
+		lineChunk += " " + line.getNextWord().replace(System.getProperty("line.separator"), "<br>" + System.getProperty("line.separator"));
+		linePane.setText(lineChunk);
 
-		if (words.equals(line.toHTMLString()))
+		if (lineChunk.equals(line.toHTMLString()))
 		{
 			showWord.setEnabled(false);
 			showLine.setEnabled(false);
@@ -214,5 +288,20 @@ public class PromptFrame extends JFrame implements ActionListener
 		linePane.setText(line.toHTMLString());
 		showWord.setEnabled(false);
 		showLine.setEnabled(false);
+	}
+
+	static class NumericDocument extends PlainDocument
+	{
+
+		@Override
+		public void insertString(int offset, String string, AttributeSet a) throws BadLocationException
+		{
+			if (string == null)
+			{
+				return;
+			}
+
+			super.insertString(offset, string.replaceAll("[^0-9]", ""), a);
+		}
 	}
 }

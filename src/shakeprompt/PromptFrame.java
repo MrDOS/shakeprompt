@@ -327,6 +327,11 @@ public class PromptFrame extends JFrame implements ActionListener
 		// For sequential.
 		int lineId = ++lastLine;
 		System.out.println(lineId);
+		if (lineId < rangeMinimum)
+		{
+			lineId = rangeMinimum;
+			lastLine = rangeMinimum;
+		}
 		if (lineId > rangeMaximum)
 		{
 			lineId = rangeMinimum;

@@ -39,13 +39,20 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import javax.imageio.ImageIO;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.text.AttributeSet;
@@ -55,25 +62,47 @@ import javax.swing.text.PlainDocument;
 public class PromptFrame extends JFrame implements ActionListener
 {
 
-	JEditorPane cuePane;
-	JEditorPane linePane;
-	JPanel rangePanel;
-	JTextField rangeMinimum;
-	JTextField rangeMaximum;
-	JButton nextLine;
-	JButton showWord;
-	JButton showLine;
-	JButton quit;
-	Line line = new Line(new PlayCharacter(""), "");
-	String lineChunk;
+	private JEditorPane cuePane;
+	private JEditorPane linePane;
+	private JPanel rangePanel;
+	private JTextField rangeMinimum;
+	private JTextField rangeMaximum;
+	private JPanel orderPanel;
+	private JRadioButton sequential;
+	private JRadioButton random;
+	private ButtonGroup orderGroup;
+	private JButton nextLine;
+	private JButton showWord;
+	private JButton showLine;
+	private JButton quit;
+	// Even though there is no "-1" element in the lines List, this is incremented right off the bat so it's always >= 0 by the time it's first used.
+	private int lastLine = -1;
+	private Line line = new Line(new PlayCharacter(""), "");
+	private String lineChunk;
 
 	public PromptFrame()
 	{
 		setTitle("ShakePrompt");
+
+		List<BufferedImage> icons = new ArrayList<BufferedImage>();
+		try
+		{
+			icons.add(ImageIO.read(getClass().getResourceAsStream("/shakeprompt/res/16.png")));
+			icons.add(ImageIO.read(getClass().getResourceAsStream("/shakeprompt/res/32.png")));
+			icons.add(ImageIO.read(getClass().getResourceAsStream("/shakeprompt/res/48.png")));
+		}
+		catch (IOException e)
+		{
+			System.out.println("Couldn't load icon!");
+		}
+		setIconImages(icons);
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationByPlatform(true);
 
-		setPreferredSize(new Dimension(480, 576));
+		Dimension size = new Dimension(480, 576);
+		setPreferredSize(size);
+		setMinimumSize(size);
 
 		setLayout(new GridBagLayout());
 		GridBagConstraints c;
@@ -162,7 +191,7 @@ public class PromptFrame extends JFrame implements ActionListener
 		rangePanel.add(rangeMaximum, c);
 
 		c = new GridBagConstraints();
-		JLabel range = new JLabel("(Max: " + Integer.valueOf(Main.lines.size()).toString() + ")");
+		JLabel range = new JLabel("(Total: " + Integer.valueOf(Main.lines.size()).toString() + ")");
 		range.setEnabled(false);
 		c.insets = new Insets(4, 4, 4, 4);
 		c.gridx = 4;
@@ -170,13 +199,50 @@ public class PromptFrame extends JFrame implements ActionListener
 		rangePanel.add(range, c);
 
 		c = new GridBagConstraints();
+		orderPanel = new JPanel();
+		orderPanel.setLayout(new GridBagLayout());
+		c.anchor = GridBagConstraints.WEST;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1;
+		c.insets = new Insets(0, 4, 0, 4);
+		c.gridx = 0;
+		c.gridy = 5;
+		c.gridwidth = 4;
+		add(orderPanel, c);
+
+		c = new GridBagConstraints();
+		c.insets = new Insets(4, 4, 4, 4);
+		c.gridx = 0;
+		c.gridy = 0;
+		orderPanel.add(new JLabel("Order:"), c);
+
+		c = new GridBagConstraints();
+		sequential = new JRadioButton("Sequential");
+		sequential.setSelected(true);
+		c.insets = new Insets(4, 4, 4, 4);
+		c.gridx = 1;
+		c.gridy = 0;
+		orderPanel.add(sequential, c);
+
+		c = new GridBagConstraints();
+		random = new JRadioButton("Random");
+		c.insets = new Insets(4, 4, 4, 4);
+		c.gridx = 2;
+		c.gridy = 0;
+		orderPanel.add(random, c);
+
+		orderGroup = new ButtonGroup();
+		orderGroup.add(sequential);
+		orderGroup.add(random);
+
+		c = new GridBagConstraints();
 		nextLine = new JButton("Next Line");
 		nextLine.setMnemonic(KeyEvent.VK_N);
-		nextLine.setToolTipText("Show another random line.");
+		nextLine.setToolTipText("Show the next line.");
 		nextLine.addActionListener(this);
 		c.anchor = GridBagConstraints.EAST;
 		c.gridx = 0;
-		c.gridy = 5;
+		c.gridy = 6;
 		c.insets = new Insets(4, 4, 4, 4);
 		add(nextLine, c);
 
@@ -188,7 +254,7 @@ public class PromptFrame extends JFrame implements ActionListener
 		showWord.addActionListener(this);
 		c.anchor = GridBagConstraints.WEST;
 		c.gridx = 1;
-		c.gridy = 5;
+		c.gridy = 6;
 		c.insets = new Insets(4, 4, 4, 0);
 		add(showWord, c);
 
@@ -200,18 +266,18 @@ public class PromptFrame extends JFrame implements ActionListener
 		showLine.addActionListener(this);
 		c.anchor = GridBagConstraints.WEST;
 		c.gridx = 2;
-		c.gridy = 5;
+		c.gridy = 6;
 		c.insets = new Insets(4, 0, 4, 4);
 		add(showLine, c);
 
 		c = new GridBagConstraints();
 		quit = new JButton("Quit");
 		quit.setMnemonic(KeyEvent.VK_Q);
-		quit.setToolTipText("Quit the program.");
+		quit.setToolTipText("Exit the program.");
 		quit.addActionListener(this);
 		c.anchor = GridBagConstraints.EAST;
 		c.gridx = 3;
-		c.gridy = 5;
+		c.gridy = 6;
 		c.insets = new Insets(4, 4, 4, 4);
 		add(quit, c);
 
@@ -242,33 +308,59 @@ public class PromptFrame extends JFrame implements ActionListener
 
 	private void nextLine()
 	{
+		// Get the minimum/maximum range values from the GUI.
+		int rangeMinimum = Integer.valueOf(this.rangeMinimum.getText()) - 1;
+		int rangeMaximum = Integer.valueOf(this.rangeMaximum.getText()) - 1;
+
+		// Make sure the minimum/maximum range values are acceptable.
+		if (rangeMinimum < 0)
+		{
+			this.rangeMinimum.setText("1");
+			rangeMinimum = 0;
+		}
+		if (rangeMinimum > rangeMaximum)
+		{
+			this.rangeMaximum.setText(Integer.valueOf(rangeMinimum + 1).toString());
+			rangeMaximum = rangeMinimum;
+		}
+
+		// For sequential.
+		int lineId = ++lastLine;
+		System.out.println(lineId);
+		if (lineId > rangeMaximum)
+		{
+			lineId = rangeMinimum;
+			lastLine = rangeMinimum;
+		}
+
+		// For random.
+		if (random.isSelected())
+		{
+			lineId = new Random().nextInt(rangeMaximum - rangeMinimum) + rangeMinimum;
+			lastLine = lineId;
+		}
+
+		// Try to get the line.
 		try
 		{
-			int rangeMinimum = (Integer.valueOf(this.rangeMinimum.getText()) - 1);
-			int rangeMaximum = Integer.valueOf(this.rangeMaximum.getText());
-
-			if (rangeMinimum < 1)
-			{
-				this.rangeMinimum.setText("1");
-				rangeMinimum = 1;
-			}
-			if (rangeMinimum + 1 > rangeMaximum)
-			{
-				this.rangeMaximum.setText(Integer.valueOf(rangeMinimum + 1).toString());
-				rangeMaximum = rangeMinimum + 1;
-			}
-
-			line = Main.lines.get(new Random().nextInt(rangeMaximum - rangeMinimum) + rangeMinimum);
-			lineChunk = "<strong>" + line.getCharacter().getName() + ":</strong>";
-			cuePane.setText(line.getCue().toHTMLString());
-			linePane.setText("");
-			showWord.setEnabled(true);
-			showLine.setEnabled(true);
+			line = Main.lines.get(lineId);
 		}
 		catch (IllegalArgumentException ex)
 		{
 			JOptionPane.showMessageDialog(null, "No lines found!", "ShakePrompt", JOptionPane.ERROR_MESSAGE);
 		}
+
+		// We've got to reset the line's word prompt, or else we'll recieve words from part-way through the line if the line's already been shown and the user's requested a prompt.
+		line.reset();
+		// Reset the chunk of the line we use to build word prompts.
+		lineChunk = "<strong>" + line.getCharacter().getName() + ":</strong>";
+		// Put the cue onscreen.
+		cuePane.setText(line.getCue().toHTMLString());
+		// Clear the previous line.
+		linePane.setText("");
+		// Enable the prompt buttons.
+		showWord.setEnabled(true);
+		showLine.setEnabled(true);
 	}
 
 	private void showWord()

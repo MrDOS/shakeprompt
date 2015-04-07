@@ -87,9 +87,9 @@ public class PromptFrame extends JFrame implements ActionListener
 		List<BufferedImage> icons = new ArrayList<BufferedImage>();
 		try
 		{
-			icons.add(ImageIO.read(getClass().getResourceAsStream("/shakeprompt/res/16.png")));
-			icons.add(ImageIO.read(getClass().getResourceAsStream("/shakeprompt/res/32.png")));
-			icons.add(ImageIO.read(getClass().getResourceAsStream("/shakeprompt/res/48.png")));
+			icons.add(ImageIO.read(ClassLoader.getSystemResourceAsStream("icon-16.png")));
+			icons.add(ImageIO.read(ClassLoader.getSystemResourceAsStream("icon-32.png")));
+			icons.add(ImageIO.read(ClassLoader.getSystemResourceAsStream("icon-48.png")));
 		}
 		catch (IOException e)
 		{

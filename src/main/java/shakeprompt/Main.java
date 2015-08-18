@@ -38,46 +38,92 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
+import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 
 public class Main
 {
-	public static List<Line> lines = new ArrayList<Line>();
+    private static final String APP_NAME = "ShakePrompt";
+    private static ImageIcon DLG_ICON;
 
-	public static void main(String[] args)
-	{
-		try
-		{
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		}
-		catch (Exception e)
-		{
-		}
+    static {
+        try
+        {
+            DLG_ICON = new ImageIcon(ImageIO.read(ClassLoader.getSystemResourceAsStream("icon-48.png")));
+        }
+        catch (IOException e)
+        {
+            DLG_ICON = null;
+        }
+    }
 
-		String url = JOptionPane.showInputDialog(null, "Enter URL for the Open Source Shakespeare print/save page with lines and cues for your character:", "ShakePrompt", JOptionPane.QUESTION_MESSAGE);
-		if (url == null || url.equals(""))
-		{
-			JOptionPane.showMessageDialog(null, "No URL given!", "ShakePrompt", JOptionPane.ERROR_MESSAGE);
-			System.exit(100);
-		}
+    public static void main(String[] args)
+    {
+        try
+        {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        }
+        catch (Exception e)
+        {
+        }
 
-		try
-		{
-			lines = LineParser.getLines(new URL(url));
-		}
-		catch (MalformedURLException e)
-		{
-			JOptionPane.showMessageDialog(null, "Could not parse URL!", "ShakePrompt", JOptionPane.ERROR_MESSAGE);
-			System.exit(101);
-		}
-		catch (IOException e)
-		{
-			JOptionPane.showMessageDialog(null, "Could not retrieve page!", "ShakePrompt", JOptionPane.ERROR_MESSAGE);
-			System.exit(102);
-		}
+        List<Play> plays = null;
+        List<PlayCharacter> characters = null;
+        List<Line> lines = null;
 
-		PromptFrame frame = new PromptFrame();
-		frame.setVisible(true);
-	}
+        try
+        {
+            plays = OSSClient.getPlays();
+        }
+        catch (IOException e)
+        {
+            fail("Could not retrieve a list of plays!", 100);
+        }
+
+        Play play = promptOption("From which play do you want to select a character?", plays);
+        if (play == null)
+            System.exit(0);
+
+        try
+        {
+            characters = OSSClient.getPlayCharacters(play);
+        }
+        catch (IOException e)
+        {
+            fail("Could not retrieve a list of characters for the play!", 101);
+        }
+
+        PlayCharacter character = promptOption("For which character do you want to view lines?", characters);
+        if (character == null)
+            System.exit(0);
+
+        try
+        {
+            lines = OSSClient.getCharacterLines(play, character);
+        }
+        catch (IOException e)
+        {
+            fail("Could not retrieve lines for the character!", 102);
+        }
+
+        PromptFrame frame = new PromptFrame(lines);
+        frame.setVisible(true);
+    }
+
+    private static <T> T promptOption(String message, List<T> options)
+    {
+        Object[] optarr = options.toArray(new Object[options.size()]);
+        return (T) JOptionPane.showInputDialog(null, message, APP_NAME,
+                                               JOptionPane.QUESTION_MESSAGE,
+                                               DLG_ICON, optarr, optarr[0]);
+    }
+
+    private static void fail(String message, int errorCode)
+    {
+        JOptionPane.showMessageDialog(null, message, APP_NAME,
+                                      JOptionPane.ERROR_MESSAGE, DLG_ICON);
+        System.exit(errorCode);
+    }
 }

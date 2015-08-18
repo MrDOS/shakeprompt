@@ -43,7 +43,6 @@ import java.util.List;
 
 public class LineParser
 {
-
 	/**
 	 * Retrieves a character's print/save page from Open Source Shakespeare and parses lines and cues out of it.
 	 * @param url URL of the print/save page to parse.
@@ -52,14 +51,7 @@ public class LineParser
 	 */
 	public static List<Line> getLines(URL url) throws IOException
 	{
-		URLConnection connection = url.openConnection();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-		String page = "";
-		String htmlLine;
-		while ((htmlLine = reader.readLine()) != null)
-		{
-			page += htmlLine;
-		}
+		String page = OSSClient.getPage(url);
 
 		List<Line> retval = new ArrayList<Line>();
 
@@ -76,7 +68,7 @@ public class LineParser
 
 			// Attach the cue to the main line.
 			line.setCue(cue);
-			
+
 			// Now that we have both lines, we can add them to the return value.
 			retval.add(line);
 		}

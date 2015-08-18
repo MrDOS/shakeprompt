@@ -1,7 +1,7 @@
 /*
  * Software License Agreement (BSD License)
  *
- * Copyright (c) 2010, Samuel Coleman
+ * Copyright (c) 2015, Samuel Coleman
  * All rights reserved.
  *
  * Redistribution and use of this software in source and binary forms, with or without modification, are
@@ -33,22 +33,22 @@
 
 package shakeprompt;
 
-public class PlayCharacter implements Comparable<PlayCharacter>
+public class Play implements Comparable<Play>
 {
-	private final String name;
-	private final String id;
+    private final String name;
+    private final String id;
 
-	public PlayCharacter(String name)
-	{
-		this.name = name;
-		this.id = null;
-	}
+    public Play(String name)
+    {
+        this.name = name;
+        this.id = null;
+    }
 
-	public PlayCharacter(String name, String id)
-	{
-		this.name = name;
-		this.id = id;
-	}
+    public Play(String name, String id)
+    {
+        this.name = name;
+        this.id = id;
+    }
 
     @Override
     public String toString()
@@ -56,17 +56,17 @@ public class PlayCharacter implements Comparable<PlayCharacter>
         return this.name;
     }
 
-	public String getName()
-	{
-		return this.name;
-	}
+    public String getName()
+    {
+        return this.name;
+    }
 
-	public String getId()
-	{
-		return this.id;
-	}
+    public String getId()
+    {
+        return this.id;
+    }
 
-    public int compareTo(PlayCharacter o)
+    public int compareTo(Play o)
     {
         return this.name.compareTo(o.name);
     }

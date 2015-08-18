@@ -61,6 +61,7 @@ import javax.swing.text.PlainDocument;
 
 public class PromptFrame extends JFrame implements ActionListener
 {
+	private List<Line> lines;
 
 	private JEditorPane cuePane;
 	private JEditorPane linePane;
@@ -80,9 +81,11 @@ public class PromptFrame extends JFrame implements ActionListener
 	private Line line = new Line(new PlayCharacter(""), "");
 	private String lineChunk;
 
-	public PromptFrame()
+	public PromptFrame(List<Line> lines)
 	{
 		setTitle("ShakePrompt");
+
+		this.lines = lines;
 
 		List<BufferedImage> icons = new ArrayList<BufferedImage>();
 		try
@@ -183,7 +186,7 @@ public class PromptFrame extends JFrame implements ActionListener
 		rangePanel.add(rangeDivider, c);
 
 		c = new GridBagConstraints();
-		rangeMaximum = new JTextField(new NumericDocument(), Integer.valueOf(Main.lines.size()).toString(), 2);
+		rangeMaximum = new JTextField(new NumericDocument(), Integer.valueOf(lines.size()).toString(), 2);
 		rangeMaximum.setHorizontalAlignment(JTextField.RIGHT);
 		c.insets = new Insets(4, 4, 4, 4);
 		c.gridx = 3;
@@ -191,7 +194,7 @@ public class PromptFrame extends JFrame implements ActionListener
 		rangePanel.add(rangeMaximum, c);
 
 		c = new GridBagConstraints();
-		JLabel range = new JLabel("(Total: " + Integer.valueOf(Main.lines.size()).toString() + ")");
+		JLabel range = new JLabel("(Total: " + Integer.valueOf(lines.size()).toString() + ")");
 		range.setEnabled(false);
 		c.insets = new Insets(4, 4, 4, 4);
 		c.gridx = 4;
@@ -326,7 +329,6 @@ public class PromptFrame extends JFrame implements ActionListener
 
 		// For sequential.
 		int lineId = ++lastLine;
-		System.out.println(lineId);
 		if (lineId < rangeMinimum)
 		{
 			lineId = rangeMinimum;
@@ -348,7 +350,7 @@ public class PromptFrame extends JFrame implements ActionListener
 		// Try to get the line.
 		try
 		{
-			line = Main.lines.get(lineId);
+			line = this.lines.get(lineId);
 		}
 		catch (IllegalArgumentException ex)
 		{

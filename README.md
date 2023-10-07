@@ -2,4 +2,4 @@ ShakePrompt is a tool to help memorize Shakespeare. Given a complete list of a c
 
 Project is currently in very early stages of development and possibly buggy, but functional.
 
-Requires the [Java Runtime Environment (JRE) 6](http://java.com/en/) or higher.
+Requires the [Java Runtime Environment (JRE) 8](http://java.com/en/) or higher.

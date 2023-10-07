@@ -64,6 +64,7 @@ public class PromptFrame extends JFrame implements ActionListener
 	private List<Line> lines;
 
 	private JEditorPane cuePane;
+	private JLabel lineLabel;
 	private JEditorPane linePane;
 	private JPanel rangePanel;
 	private JTextField rangeMinimum;
@@ -131,11 +132,12 @@ public class PromptFrame extends JFrame implements ActionListener
 		add(new JScrollPane(cuePane), c);
 
 		c = new GridBagConstraints();
+		lineLabel = new JLabel("Line:");
 		c.anchor = GridBagConstraints.NORTHWEST;
 		c.insets = new Insets(4, 4, 0, 4);
 		c.gridx = 0;
 		c.gridy = 2;
-		add(new JLabel("Line:"), c);
+		add(lineLabel, c);
 
 		c = new GridBagConstraints();
 		linePane = new JEditorPane("text/html", "");
@@ -357,6 +359,7 @@ public class PromptFrame extends JFrame implements ActionListener
 			JOptionPane.showMessageDialog(null, "No lines found!", "ShakePrompt", JOptionPane.ERROR_MESSAGE);
 		}
 
+		lineLabel.setText(String.format("Line %d:", lineId + 1));
 		// We've got to reset the line's word prompt, or else we'll recieve words from part-way through the line if the line's already been shown and the user's requested a prompt.
 		line.reset();
 		// Reset the chunk of the line we use to build word prompts.

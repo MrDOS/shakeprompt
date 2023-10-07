@@ -49,11 +49,11 @@ import java.util.regex.Pattern;
  */
 public class OSSClient
 {
-    private static final String PLAYS_URL_FORMAT = "http://opensourceshakespeare.org/views/plays/plays.php";
-    private static final String CHARS_URL_FORMAT = "http://opensourceshakespeare.org/views/plays/playmenu.php?WorkID=%s";
-    private static final String LINES_URL_FORMAT = "http://opensourceshakespeare.org/views/plays/characters/charlines.php?WorkID=%s&CharID=%s&cues=1&longspeeches=0&displaytype=print";
+    private static final String PLAYS_URL_FORMAT = "https://www.opensourceshakespeare.org/views/plays/plays.php";
+    private static final String CHARS_URL_FORMAT = "https://www.opensourceshakespeare.org/views/plays/playmenu.php?WorkID=%s";
+    private static final String LINES_URL_FORMAT = "https://www.opensourceshakespeare.org/views/plays/characters/charlines.php?WorkID=%s&CharID=%s&cues=1&longspeeches=0&displaytype=print";
 
-    private static final Pattern PLAY_PATTERN = Pattern.compile("<a href='playmenu\\.php\\?WorkID=([a-z0-9]+)'>(.+?)<br></a>");
+    private static final Pattern PLAY_PATTERN = Pattern.compile("<a href='playmenu\\.php\\?WorkID=([a-z0-9]+)'><strong>(.+?)</strong></a>");
     private static final Pattern CHAR_PATTERN = Pattern.compile("<li class='charnames'><a href='characters/charlines\\.php\\?CharID=([A-Za-z0-9-]+)&WorkID=([a-z0-9]+)'><strong>(.+?)</strong></a>(, (.+?))?</li>");
 
     /**

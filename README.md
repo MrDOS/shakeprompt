@@ -39,7 +39,7 @@ Double-click it to launch it,
 or run from the command line:
 
 ```
-java -jar shakeprompt-1.1.0.jar
+java -jar shakeprompt-1.2.0.jar
 ```
 
 Requires Java 8 or higher to be installed.
